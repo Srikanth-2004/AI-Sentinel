@@ -84,13 +84,6 @@ FINAL ANSWER (UNVERIFIED):
 
 ``` 
 ---
-## How to Run
-
-1.  **Cloud ("Brain"):** `brain_v0.1.py` runs on a 1GB Azure VM.
-2.  **Local ("Brawn"):** `ollama serve` runs on a local machine (8GB+ RAM).
-3.  **Network:** Both machines are connected via **Tailscale**.
-
----
 
 ## **Status:** Phase 2 (Working Prototype) Complete
 
