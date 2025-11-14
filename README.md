@@ -141,7 +141,7 @@ Checking dependencies... (psutil, requests, redis)
 *   **Brain (Azure VM Standard\_B1s):** Runs the main `brain_v0.3_cache.py` script. This lightweight server handles API requests, consensus logic, and the cache connection. It runs on a free Azure for Students account.
 *   **Brawn (Local Laptop):** Runs `ollama serve` to provide AI compute. This node is "dumb" and simply processes AI requests sent to it.
 *   **Network (Tailscale):** A zero-trust mesh network that creates a secure, encrypted mTLS tunnel between the Azure VM and the local laptop, allowing them to communicate privately without opening public firewall ports.
-*   **Cache (Azure Cache for Redis):** A free-tier Redis instance (30MB) that acts as an L1 cache to store results from the consensus engine, reducing cost and latency on repeat queries.
+*   **Cache (Azure Cache for Redis):** A free-tier Redis instance (250MB) that acts as an L1 cache to store results from the consensus engine, reducing cost and latency on repeat queries.
 
 ---
 
