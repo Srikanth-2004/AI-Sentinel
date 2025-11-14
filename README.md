@@ -15,6 +15,9 @@ The system is built on a **zero-fund "hybrid-cloud" model**. The "Brain" (a 1GB 
 
 This diagram shows the live prototype. The Azure VM (Brain) acts as the router and aggregator, while the Home Laptop (Brawn) acts as the firewalled AI compute node.
 
+<img width="612" height="797" alt="AI Sentinel (Request Flow)" src="https://github.com/user-attachments/assets/a164ab23-6adf-412a-9c8b-b3a6b9d62ba2" />
+
+
 ## Live Demo Output
 
 This log shows the system successfully running on an 8GB laptop and a 1GB Azure VM.
