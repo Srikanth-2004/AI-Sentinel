@@ -1,6 +1,6 @@
 # AI Sentinel (A Hybrid-Cloud Prototype)
 
-**Status:** Phase 1 (Complete)
+## **Status:** Phase 1 (Complete)
 
 This is a proof-of-concept for the "Global AI Infrastructure Project," demonstrating a high-reliability, low-cost AI governance layer.
 
@@ -11,6 +11,7 @@ The system is designed to solve two core problems:
 
 The system is built on a **zero-fund "hybrid-cloud" model**. The "Brain" (a 1GB VM on Azure Free Tier) securely commands a "Brawn" (a local laptop) over a zero-trust network (Tailscale) to run multiple AI models, detect hallucinations, and form a consensus.
 
+---
 ## Core Features
 
 *   **Hybrid-Cloud Architecture:** The "Brain" (logic) and "Brawn" (compute) run on separate machines in different locations (public cloud + home).
@@ -18,12 +19,17 @@ The system is built on a **zero-fund "hybrid-cloud" model**. The "Brain" (a 1GB 
 *   **"Super AI" Consensus:** The Brain queries 3 models (1 real, 2 mock) to detect and reject "hallucinations" (bad answers).
 *   **Hardware-Gated Kill Switch:** A `watchdog.py` script monitors system RAM and will terminate the process to prevent a crash from a "bad update" or memory leak.
 
+---
+
 ## Architecture Diagram
 
 This diagram shows the live prototype. The Azure VM (Brain) acts as the router and aggregator, while the Home Laptop (Brawn) acts as the firewalled AI compute node.
 
+### Phase 1:
 <img width="612" height="797" alt="AI Sentinel (Request Flow)" src="https://github.com/user-attachments/assets/a164ab23-6adf-412a-9c8b-b3a6b9d62ba2" />
 
+### Phase 2:
+<img width="916" height="1084" alt="AI Sentinel (Phase 2)" src="https://github.com/user-attachments/assets/d797d47f-5dd6-4415-8c0f-47425225cce8" />
 
 ## Live Demo Output
 
@@ -77,14 +83,16 @@ FINAL ANSWER (UNVERIFIED):
 (A mock response for a Tokyo plan)
 
 ``` 
-
+---
 ## How to Run
 
 1.  **Cloud ("Brain"):** `brain_v0.1.py` runs on a 1GB Azure VM.
 2.  **Local ("Brawn"):** `ollama serve` runs on a local machine (8GB+ RAM).
 3.  **Network:** Both machines are connected via **Tailscale**.
 
-**Status:** Phase 2 (Working Prototype) Complete
+---
+
+## **Status:** Phase 2 (Working Prototype) Complete
 
 ## Core Architecture (Phase 2)
 
@@ -133,6 +141,7 @@ Checking dependencies... (psutil, requests, redis)
 # FINAL VERIFIED ANSWER (FROM CACHE): The answer depends on your location and time of day...
 
 ````
+---
 
 ## How It Works
 
@@ -140,6 +149,8 @@ Checking dependencies... (psutil, requests, redis)
 *   **Brawn (Local Laptop):** Runs `ollama serve` to provide AI compute. This node is "dumb" and simply processes AI requests sent to it.
 *   **Network (Tailscale):** A zero-trust mesh network that creates a secure, encrypted mTLS tunnel between the Azure VM and the local laptop, allowing them to communicate privately without opening public firewall ports.
 *   **Cache (Azure Cache for Redis):** A free-tier Redis instance (30MB) that acts as an L1 cache to store results from the consensus engine, reducing cost and latency on repeat queries.
+
+---
 
 ## Roadmap / Next Steps
 
