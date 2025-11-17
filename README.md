@@ -1,158 +1,89 @@
 # AI Sentinel (A Hybrid-Cloud Prototype)
 
-## **Status:** Phase 1 (Complete)
+**Status:** Phase 4 (Smart Router Prototype) Complete
 
 This is a proof-of-concept for the "Global AI Infrastructure Project," demonstrating a high-reliability, low-cost AI governance layer.
 
-The system is designed to solve two core problems:
+The system is built on a **zero-fund, multi-cloud model** and is designed to solve two core problems:
 
-1.  **AI Hallucinations:** It cross-references answers from a committee of AI models to find a verifiable consensus, rejecting "bad" answers.
-2.  **High Compute Cost:** It uses a hybrid-cloud model, running a fast, local "Brawn" node (on a laptop) and a lightweight "Brain" node (on a free Azure VM) to manage logic and caching.
+- **High Compute Cost:** A "Smart Router" analyzes prompt complexity. Simple prompts are routed to a single, fast model, while complex prompts are escalated to a full consensus check.
+- **AI Hallucinations:** The system cross-references answers from a committee of AI models to find a verifiable consensus, rejecting "bad" answers.
 
-The system is built on a **zero-fund "hybrid-cloud" model**. The "Brain" (a 1GB VM on Azure Free Tier) securely commands a "Brawn" (a local laptop) over a zero-trust network (Tailscale) to run multiple AI models, detect hallucinations, and form a consensus.
-
----
 ## Core Features
 
-*   **Hybrid-Cloud Architecture:** The "Brain" (logic) and "Brawn" (compute) run on separate machines in different locations (public cloud + home).
-*   **Zero-Trust Network:** Uses **Tailscale** for a secure, encrypted mTLS tunnel. The cloud VM has *zero* open public ports, making it invisible to the internet.
-*   **"Super AI" Consensus:** The Brain queries 3 models (1 real, 2 mock) to detect and reject "hallucinations" (bad answers).
-*   **Hardware-Gated Kill Switch:** A `watchdog.py` script monitors system RAM and will terminate the process to prevent a crash from a "bad update" or memory leak.
+- **Hybrid-Cloud Architecture:** The "Brain" (logic) runs on a 1GB Azure VM, and the "Brawn" (AI compute) runs on a local 8GB laptop.
+- **Multi-Cloud Caching:** Uses a free **Redis.com (AWS-hosted)** L1 Cache. The Brain (Azure) and Cache (AWS) operate in different clouds but in the same geographic region (India) for low latency.
+- **Zero-Trust Network:** Uses **Tailscale** for a secure, encrypted mTLS tunnel. The cloud VM has _zero_ open public ports, making it invisible to the internet.
+- **"Super AI" Consensus:** The Brain queries multiple models (1 real, 2 mock) to detect and reject "hallucinations."
+- **"Smart Router" (v0.5):** Analyzes prompts for keywords (analyze, compare, summarize) to decide whether to use the "cheap path" (1 model) or "expensive path" (3 models).
 
----
+## Architecture Diagram (Phase 4)
 
-## Architecture Diagram
+This diagram shows the final, working logic flow. The "Smart Router" is the new entry point after a cache miss.
 
-This diagram shows the live prototype. The Azure VM (Brain) acts as the router and aggregator, while the Home Laptop (Brawn) acts as the firewalled AI compute node.
+<img width="912" height="1233" alt="AI Sentinel (Phase 4)" src="https://github.com/user-attachments/assets/e1845eed-6f2a-46b9-83ac-074f126657e1" />
 
-### Phase 1:
-<img width="612" height="797" alt="AI Sentinel (Request Flow)" src="https://github.com/user-attachments/assets/a164ab23-6adf-412a-9c8b-b3a6b9d62ba2" />
 
-### Phase 2:
-<img width="916" height="1084" alt="AI Sentinel (Phase 2)" src="https://github.com/user-attachments/assets/d797d47f-5dd6-4415-8c0f-47425225cce8" />
+## Live Demo Log (SUCCESS!)
 
-## Live Demo Output
+This log shows the complete system successfully routing two different prompts.
 
-This log shows the system successfully running on an 8GB laptop and a 1GB Azure VM.
+Test 1: Simple Prompt ("What is 2+2?")
 
-### Test 1: Hallucination Detected & Rejected
+The "Smart Router" detects a simple prompt and routes it to the "Cheap Path" (1 model).
 
-```
+\[Super AI\] New Prompt Received: 'What is 2+2?'  
+\[Cache\] MISS! Proceeding to Smart Router...  
+\[Router\] Analyzing prompt complexity...  
+\[Router\] SIMPLE query detected.  
+\[Super AI\] Executing Cheap Path (1 model)...  
+\[Router\] Querying BRAWN Node (100.66.2.112) for: tinyllama  
+<br/>FINAL ANSWER (Simple):  
+Yes, I can provide you with the answer to your question: 2 + 2 = 4.  
+\[Cache\] SUCCESS: Saved new answer to cache.  
 
-\[Super AI\] New Prompt Received: 'What is the color of the sky?'
-\[Super AI\] Querying model committee...
-\[Router\] Querying BRAWN Node (100.x.x.x) for: phi3:mini
-\[Router\] Simulating MOCK request on BRAIN for: llama3:8b
-\[Router\] Simulating MOCK request on BRAIN for: mistral:7b
+Test 2: Complex Prompt ("analyze...")
 
-\[Super AI\] --- VOTES RECEIVED ---
+The "Smart Router" detects a complex prompt ("analyze") and escalates to the full 3-model consensus.
 
-> phi3:mini: The sky is blue.
-> llama3:8b: The sky is green due to atmospheric composition.
-> mistral:7b: The sky is blue.
+\[Super AI\] New Prompt Received: 'Please analyze the pros and cons of this project.'  
+\[Cache\] MISS! Proceeding to Smart Router...  
+\[Router\] Analyzing prompt complexity...  
+\[Router\] COMPLEX query detected (keyword: 'analyze')  
+\[Super AI\] Executing 3-Model Consensus...  
+\[Router\] Querying BRAWN Node (100.66.2.112) for: tinyllama  
+\[Router\] Simulating MOCK request on BRAIN for: llama3:8b  
+\[Router\] Simulating MOCK request on BRAIN for: mistral:7b  
+<br/>\[Super AI\] --- VOTES RECEIVED ---  
+\> tinyllama: Analysis: Pros and Cons of this Project...  
+\> llama3:8b: Mock response from llama3:8b for a complex query....  
+\> mistral:7b: Mock response from mistral:7b for a complex query....  
+<br/>\[Super AI\] --- RESOLUTION ---  
+\[Super AI\] CONFLICT DETECTED: No clear majority.  
+FINAL ANSWER (UNVERIFIED):  
+Analysis: Pros and Cons of this Project...  
+\[Cache\] SUCCESS: Saved new answer to cache.  
 
-\[Super AI\] --- RESOLUTION ---
-\[Super AI\] Consensus Reached (Vote: 2/3)
+Test 3: Cache Test (Fast Path)
 
-FINAL VERIFIED ANSWER:
-The sky is blue.
+The system correctly pulls the answer for "2+2?" from the cache, skipping all AI models.
 
-``` 
-
-### Test 2: Conflict Detected & Handled
-
-```
-
-\[Super AI\] New Prompt Received: 'Write a 3-day travel plan for Tokyo.'
-\[Super AI\] Querying model committee...
-\[Router\] Querying BRAWN Node (100.x.x.x) for: phi3:mini
-\[Router\] Simulating MOCK request on BRAIN for: llama3:8b
-\[Router\] Simulating MOCK request on BRAIN for: mistral:7b
-
-\[Super AI\] --- VOTES RECEIVED ---
-
-> phi3:mini: (A mock response for a Tokyo plan)
-> llama3:8b: (A different mock response)
-> mistral:7b: (A third different mock response)
-
-\[Super AI\] --- RESOLUTION ---
-\[Super AI\] CONFLICT DETECTED: No clear majority.
-\[Super AI\] Defaulting to primary node (phi3:mini).
-
-FINAL ANSWER (UNVERIFIED):
-(A mock response for a Tokyo plan)
-
-``` 
----
-
-## **Status:** Phase 2 (Working Prototype) Complete
-
-## Core Architecture (Phase 2)
-
-This system runs a "Brain" (the logic) in the cloud, which commands a "Brawn" (the AI model) running on a local machine. An L1 cache (Redis) is used to store common answers and reduce latency.
-
-## Demo Log (SUCCESS!)
-
-This log shows the system in action.
-
-1.  **Run 1 (Cache MISS):** The system queries the Brawn node, detects a 3-way conflict, and saves the final answer to the cache.
-2.  **Run 2 (Cache HIT):** The system retrieves the answer instantly from the L1 Cache, skipping the AI models entirely.
-
-````
-
-Checking dependencies... (psutil, requests, redis)
-\[Watchdog\] MONITORING VM RAM: \< 85.0%
-\[Watchdog\] Status: VM RAM 48.5%
-\[Cache\] SUCCESS: Connected to Redis at ai-brain-vm-01.redis.cache.windows.net
-
-# \--- FIRST RUN (Should be SLOW and say 'MISS') ---
-
-\[Super AI\] New Prompt Received: 'What is the color of the sky?'
-\[Cache\] MISS\! Running full consensus check...
-\[Super AI\] Querying model committee...
-\[Router\] Querying BRAWN Node (100.66.2.112) for: tinyllama
-\[Watchdog\] Status: VM RAM 48.5%
-\[Router\] Simulating MOCK request on BRAIN for: llama3:8b
-\[Router\] Simulating MOCK request on BRAIN for: mistral:7b
-
-\[Super AI\] --- VOTES RECEIVED ---
-
-> tinyllama: The answer depends on your location and time of day...
-> llama3:8b: The sky is green....
-> mistral:7b: The sky is blue....
-
-\[Super AI\] --- RESOLUTION ---
-\[Super AI\] CONFLICT DETECTED: No clear majority.
-
-# FINAL ANSWER (UNVERIFIED): The answer depends on your location and time of day... \[Cache\] SUCCESS: Saved new answer to cache.
-
-# \--- SECOND RUN (Should be FAST and say 'HIT') ---
-
-\[Super AI\] New Prompt Received: 'What is the color of the sky?'
-\[Cache\] HIT\! Returning answer instantly.
-
-# FINAL VERIFIED ANSWER (FROM CACHE): The answer depends on your location and time of day...
-
-````
----
+\--- RUNNING SIMPLE PROMPT AGAIN TO TEST CACHE ---  
+\[Super AI\] New Prompt Received: 'What is 2+2?'  
+\[Cache\] HIT! Returning answer instantly.  
+<br/>FINAL ANSWER (FROM CACHE):  
+Yes, I can provide you with the answer to your question: 2 + 2 = 4.  
 
 ## How It Works
 
-*   **Brain (Azure VM Standard\_B1s):** Runs the main `brain_v0.3_cache.py` script. This lightweight server handles API requests, consensus logic, and the cache connection. It runs on a free Azure for Students account.
-*   **Brawn (Local Laptop):** Runs `ollama serve` to provide AI compute. This node is "dumb" and simply processes AI requests sent to it.
-*   **Network (Tailscale):** A zero-trust mesh network that creates a secure, encrypted mTLS tunnel between the Azure VM and the local laptop, allowing them to communicate privately without opening public firewall ports.
-*   **Cache (Azure Cache for Redis):** A free-tier Redis instance (250MB) that acts as an L1 cache to store results from the consensus engine, reducing cost and latency on repeat queries.
-
----
+- **Brain (Azure VM Standard_B1s):** Runs the main brain_v0.5_cache_fix.py script. This lightweight server handles API requests, smart routing, consensus logic, and the cache connection. Runs on a free Azure for Students account.
+- **Brawn (Local Laptop):** Runs ollama serve --host 0.0.0.0 to provide AI compute. This node is "dumb" and simply processes AI requests sent to it. Currently runs tinyllama due to 8GB RAM limit.
+- **Network (Tailscale):** A zero-trust mesh network that creates a secure, encrypted mTLS tunnel between the Azure VM and the local laptop.
+- **Cache (Redis.com on AWS):** A free-tier 30MB Redis instance (on AWS, ap-south-1) acts as an L1 cache to store results, reducing cost and latency. This makes the architecture **multi-cloud** (Azure + AWS).
 
 ## Roadmap / Next Steps
 
-*   **[ ] Phase 3: Go "Mock-Free" (Hardware)**
-    *   Install RAM upgrade on the "Brawn" node (laptop).
-    *   Pull full-size models (`llama3:8b`, `mistral:7b`) to the Brawn node.
-    *   Update `brain_v0.3_cache.py` to make 3 *real* API calls to the Brawn node, removing all mock logic.
-*   **[ ] Phase 4: Build the "Smart Router" (Logic)**
-    *   Implement a lightweight classifier (e.g., DistilBERT) on the "Brain" VM.
-    *   This router will analyze the prompt's complexity *before* running the consensus.
-    *   **Simple prompts** (e.g., "What is 2+2?") will only be sent to `tinyllama` (fast, cheap).
-    *   **Complex prompts** (e.g., "Analyze this report...") will trigger the full 3-model consensus (slow, expensive).
+- **\[ \] Phase 5: Go "Mock-Free" (Hardware)**
+  - Install **20GB RAM** upgrade on the "Brawn" node (laptop) after the Black Friday sale.
+  - Pull full-size models (llama3:8b, mistral:7b) to the Brawn node.
+  - Update brain_v0.5_cache_fix.py to make 3 _real_ API calls to the Brawn node, removing all mock logic.
