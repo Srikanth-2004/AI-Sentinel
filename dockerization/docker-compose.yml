@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  brain:
+    build: .
+    container_name: ai-sentinel-brain
+    stdin_open: true
+    tty: true
+    environment:
+      - LAPTOP_IP=${LAPTOP_IP}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    # Mount the current directory so you can edit code without rebuilding
+    volumes:
+      - .:/app
+    # Restart automatically if it crashes
+    restart: unless-stopped
+
+  # Optional: Local Redis for testing if internet is down
+  # redis-local:
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"
