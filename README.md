@@ -1,89 +1,108 @@
-# AI Sentinel (A Hybrid-Cloud Prototype)
+# **AI Sentinel (A Hybrid-Cloud Prototype)**
 
-**Status:** Phase 4 (Smart Router Prototype) Complete
+**Status:** Phase 6 (Parallel & Cascading Consensus) Complete
 
-This is a proof-of-concept for the "Global AI Infrastructure Project," demonstrating a high-reliability, low-cost AI governance layer.
+AI Sentinel is a proof-of-concept for a high-reliability, low-cost "Super AI" infrastructure. It solves two critical problems in modern AI deployment: **Hallucinations** (AI making things up) and **High Cloud Costs**.
 
-The system is built on a **zero-fund, multi-cloud model** and is designed to solve two core problems:
+By combining a **"Brain" in the cloud** with a **"Brawn" node on a local laptop**, this system delivers enterprise-grade reliability on a student budget.
 
-- **High Compute Cost:** A "Smart Router" analyzes prompt complexity. Simple prompts are routed to a single, fast model, while complex prompts are escalated to a full consensus check.
-- **AI Hallucinations:** The system cross-references answers from a committee of AI models to find a verifiable consensus, rejecting "bad" answers.
+## **🚀 Key Features**
 
-## Core Features
+### **1. The "Super AI" Consensus Engine**
 
-- **Hybrid-Cloud Architecture:** The "Brain" (logic) runs on a 1GB Azure VM, and the "Brawn" (AI compute) runs on a local 8GB laptop.
-- **Multi-Cloud Caching:** Uses a free **Redis.com (AWS-hosted)** L1 Cache. The Brain (Azure) and Cache (AWS) operate in different clouds but in the same geographic region (India) for low latency.
-- **Zero-Trust Network:** Uses **Tailscale** for a secure, encrypted mTLS tunnel. The cloud VM has _zero_ open public ports, making it invisible to the internet.
-- **"Super AI" Consensus:** The Brain queries multiple models (1 real, 2 mock) to detect and reject "hallucinations."
-- **"Smart Router" (v0.5):** Analyzes prompts for keywords (analyze, compare, summarize) to decide whether to use the "cheap path" (1 model) or "expensive path" (3 models).
+Instead of trusting a single AI model, AI Sentinel queries a **committee of 3 models** simultaneously:
 
-## Architecture Diagram (Phase 4)
+* **TinyLlama:** The fast, lightweight "Scout."  
+* **Llama-3:** The intelligent "Expert."  
+* **Mistral:** The tie-breaking "Judge."  
+  By cross-referencing their answers, the system detects and rejects hallucinations.
 
-This diagram shows the final, working logic flow. The "Smart Router" is the new entry point after a cache miss.
+### **2. The Smart Router (Cost Control)**
 
-<img width="912" height="1233" alt="AI Sentinel (Phase 4)" src="https://github.com/user-attachments/assets/e1845eed-6f2a-46b9-83ac-074f126657e1" />
+Not every question needs a supercomputer.
+
+* **Simple Question?** ("What is 2+2?") \-\> Routed to the cheap, fast model.  
+* **Complex Question?** ("Analyze this geopolitical trend...") \-\> Escalated to the full 3-model consensus engine.  
+* **Result:** Saves 90% of compute costs and time.
+
+### **3. Hybrid-Cloud Architecture**
+
+* **The Brain (Azure Cloud):** Handles the logic, routing, and caching. It's lightweight and free.  
+* **The Brawn (Local Laptop):** Handles the heavy AI processing using your own GPU/RAM.  
+* **The Network (Tailscale):** Connects them securely via an encrypted, zero-trust tunnel. No open ports, no security risks.
+
+### **4. Multi-Cloud Caching**
+
+Uses a **Redis Cache hosted on AWS** to store verified answers. If you ask the same question twice, the answer is returned instantly (\<50ms), bypassing the AI models entirely.
+
+## **🏗️ Architecture Diagram**
+
+<img width="1897" height="619" alt="image" src="https://github.com/user-attachments/assets/a46e593a-272f-4288-8e3a-c1764d2bd530" />
 
 
-## Live Demo Log (SUCCESS!)
+## **🛠️ How to Run AI Sentinel**
 
-This log shows the complete system successfully routing two different prompts.
+You can run this system in two ways: the **Standard Method** (great for development) or the **Docker Method** (great for deployment).
 
-Test 1: Simple Prompt ("What is 2+2?")
+### **Prerequisites (For Both Methods)**
 
-The "Smart Router" detects a simple prompt and routes it to the "Cheap Path" (1 model).
+1. **Tailscale:** Installed and connected on both your Laptop and Azure VM.  
+2. **Ollama:** Installed on your Laptop ("Brawn Node") with models pulled (tinyllama, llama3:8b, mistral:7b).  
+3. **Redis:** A running Redis instance (e.g., free tier on Redis.com).
 
-\[Super AI\] New Prompt Received: 'What is 2+2?'  
-\[Cache\] MISS! Proceeding to Smart Router...  
-\[Router\] Analyzing prompt complexity...  
-\[Router\] SIMPLE query detected.  
-\[Super AI\] Executing Cheap Path (1 model)...  
-\[Router\] Querying BRAWN Node (100.66.2.112) for: tinyllama  
-<br/>FINAL ANSWER (Simple):  
-Yes, I can provide you with the answer to your question: 2 + 2 = 4.  
-\[Cache\] SUCCESS: Saved new answer to cache.  
+### **Option 1: Standard Method (Python Script)**
 
-Test 2: Complex Prompt ("analyze...")
+**1. Configure the Brawn Node (Laptop)**  
+Open your terminal and start Ollama, ensuring it listens to the network:  
+```
+\# Linux/macOS  
+export OLLAMA_HOST=0.0.0.0  
+ollama serve
+```
 
-The "Smart Router" detects a complex prompt ("analyze") and escalates to the full 3-model consensus.
+```
+\# Windows PowerShell  
+$env:OLLAMA_HOST="0.0.0.0"  
+ollama serve
+```
 
-\[Super AI\] New Prompt Received: 'Please analyze the pros and cons of this project.'  
-\[Cache\] MISS! Proceeding to Smart Router...  
-\[Router\] Analyzing prompt complexity...  
-\[Router\] COMPLEX query detected (keyword: 'analyze')  
-\[Super AI\] Executing 3-Model Consensus...  
-\[Router\] Querying BRAWN Node (100.66.2.112) for: tinyllama  
-\[Router\] Simulating MOCK request on BRAIN for: llama3:8b  
-\[Router\] Simulating MOCK request on BRAIN for: mistral:7b  
-<br/>\[Super AI\] --- VOTES RECEIVED ---  
-\> tinyllama: Analysis: Pros and Cons of this Project...  
-\> llama3:8b: Mock response from llama3:8b for a complex query....  
-\> mistral:7b: Mock response from mistral:7b for a complex query....  
-<br/>\[Super AI\] --- RESOLUTION ---  
-\[Super AI\] CONFLICT DETECTED: No clear majority.  
-FINAL ANSWER (UNVERIFIED):  
-Analysis: Pros and Cons of this Project...  
-\[Cache\] SUCCESS: Saved new answer to cache.  
+**2. Configure the Brain Node (Azure VM)**  
+SSH into your VM and set your environment variables (or edit the script directly):  
+```
+export LAPTOP_IP="100.x.x.x"  \# Your Laptop's Tailscale IP  
+export REDIS_HOST="your-redis-endpoint"  
+export REDIS_PORT="12345"  
+export REDIS_PASSWORD="your-password"
+```
 
-Test 3: Cache Test (Fast Path)
+**3. Run the Sentinel**
 
-The system correctly pulls the answer for "2+2?" from the cache, skipping all AI models.
+```
+python3 brain_v2.0_cascade.py
+```
+### **Option 2: Docker Method (Recommended)**
 
-\--- RUNNING SIMPLE PROMPT AGAIN TO TEST CACHE ---  
-\[Super AI\] New Prompt Received: 'What is 2+2?'  
-\[Cache\] HIT! Returning answer instantly.  
-<br/>FINAL ANSWER (FROM CACHE):  
-Yes, I can provide you with the answer to your question: 2 + 2 = 4.  
+This method packages the entire "Brain" logic into a container, making it easy to run anywhere without installing Python manually.
 
-## How It Works
+**1. Set up your .env file**  
+Create a file named .env in the project folder with your credentials:  
+```
+LAPTOP_IP=100.x.x.x  
+REDIS_HOST=your-redis-endpoint  
+REDIS_PORT=your-redis-port  
+REDIS_PASSWORD=your-password
+```
 
-- **Brain (Azure VM Standard_B1s):** Runs the main brain_v0.5_cache_fix.py script. This lightweight server handles API requests, smart routing, consensus logic, and the cache connection. Runs on a free Azure for Students account.
-- **Brawn (Local Laptop):** Runs ollama serve --host 0.0.0.0 to provide AI compute. This node is "dumb" and simply processes AI requests sent to it. Currently runs tinyllama due to 8GB RAM limit.
-- **Network (Tailscale):** A zero-trust mesh network that creates a secure, encrypted mTLS tunnel between the Azure VM and the local laptop.
-- **Cache (Redis.com on AWS):** A free-tier 30MB Redis instance (on AWS, ap-south-1) acts as an L1 cache to store results, reducing cost and latency. This makes the architecture **multi-cloud** (Azure + AWS).
+**2. Build and Run**  
+Run this single command to start the system:  
+```
+docker compose up --build
+```
 
-## Roadmap / Next Steps
+**3. Interact with the Chatbot**
+To use the interactive chat mode inside Docker, use this command instead:  
+```
+docker compose run --rm brain
+```
 
-- **\[ \] Phase 5: Go "Mock-Free" (Hardware)**
-  - Install **20GB RAM** upgrade on the "Brawn" node (laptop) after the Black Friday sale.
-  - Pull full-size models (llama3:8b, mistral:7b) to the Brawn node.
-  - Update brain_v0.5_cache_fix.py to make 3 _real_ API calls to the Brawn node, removing all mock logic.
+This will launch the [You]: prompt where you can chat with your AI Sentinel directly.
