@@ -106,3 +106,11 @@ docker compose run --rm brain
 ```
 
 This will launch the [You]: prompt where you can chat with your AI Sentinel directly.
+
+## **For More Details - Contact Me**
+
+**Mail - srikanthkarthikeyan2004@gmail.com**
+
+**LinkedIn - https://www.linkedin.com/in/srikanth-karthikeyan-609751253**
+
+**Discord - sk7510**
