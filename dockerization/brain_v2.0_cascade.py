@@ -10,7 +10,7 @@ import concurrent.futures
 # --- 1. CONFIGURATION ---
 
 # Read from Environment Variables (Best Practice for Docker)
-LAPTOP_IP = os.getenv("LAPTOP_IP", "100.110.15.96") 
+LAPTOP_IP = os.getenv("LAPTOP_IP", "LAPTOP_IP_FROM_TAILSCALE") 
 REDIS_HOST = os.getenv("REDIS_HOST", "")
 REDIS_PORT = os.getenv("REDIS_PORT", "6379")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
